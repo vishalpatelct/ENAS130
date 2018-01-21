@@ -70,7 +70,7 @@ int main()
         bill=(rate3*(gasusage-tier3))+(rate2*(tier3-tier2))+(rate1*(tier2-tier1))+5.;
     }
 
-// display last month's and current month's gas usage and current bill.
+// display current bill.
     printf("Current bill is: $%.2f\n", bill);
     return 0;
 }
