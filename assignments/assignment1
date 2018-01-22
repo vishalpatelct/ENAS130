@@ -20,7 +20,7 @@ int main()
 // prompt user to enter previous and current month's gas readings
     for (;;)
     {
-        printf("Enter reading for last month and current month.\n");
+        printf("Enter reading for last month and current month.\n\n");
         scanf("%d %d", &lastmonth, &thismonth);
 
     // verify valid user input
@@ -71,6 +71,6 @@ int main()
     }
 
 // display current bill
-    printf("Current bill is: $%.2f\n", bill);
+    printf("\nCurrent bill is: $%.2f\n", bill);
     return 0;
 }
