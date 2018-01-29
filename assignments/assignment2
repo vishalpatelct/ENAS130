@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <math.h>
+
+
+int main()
+{
+    //defining variables
+    int n=0;
+    float  x,y,xsum = 0,ysum = 0,xsum2 = 0,ysum2 = 0 ,xsumy = 0,numerator = 0,denominator = 0;
+
+    //read this file
+    FILE *inputFile = fopen("/Users/VishalMac/Documents/Yale/Courses/Spring 2018/ENAS 130/Assignments/Assignment_2/corr.txt", "r");
+
+    //check file works
+    if(inputFile == NULL){
+        printf("Error: Could not open file.\n");
+    }
+
+    //read file and calculate sums
+    while(fscanf(inputFile,"%f %f",&x ,&y) != EOF)
+    {
+        n++;
+        xsum = xsum + x;
+        ysum = ysum + y;
+        xsum2 = xsum2 + pow(x,2);
+        ysum2 = ysum2 + pow(y,2);
+        xsumy = xsumy + (x * y);
+    }
+
+    //close the file
+    fclose(inputFile);
+
+    //calculate numerator & denominator
+    numerator = (n * xsumy) - (xsum * ysum);
+    denominator = sqrt(((n * xsum2)-(xsum * xsum)) * ((n * ysum2)-(ysum * ysum)));
+
+    //print correlation coefficient
+    printf("Correlation Coefficent is %f\n", numerator/denominator);
+
+    return 0;
+}
