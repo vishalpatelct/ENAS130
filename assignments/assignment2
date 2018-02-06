@@ -9,7 +9,7 @@ int main()
     float  x,y,xsum = 0,ysum = 0,xsum2 = 0,ysum2 = 0 ,xsumy = 0,numerator = 0,denominator = 0;
 
     //read this file
-    FILE *inputFile = fopen("/Users/VishalMac/Documents/Yale/Courses/Spring 2018/ENAS 130/Assignments/Assignment_2/corr.txt", "r");
+    FILE *inputFile = fopen("corr.txt", "r");
 
     //check file works
     if(inputFile == NULL){
