@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include <graphics.h>
+#include "graphics.h"
 
 #define ARRAYSIZE 500
 #define INITIALFILEPATHSIZE 30
