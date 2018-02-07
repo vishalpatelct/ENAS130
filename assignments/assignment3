@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <math.h>
+#include <graphics.h>
+
+#define ARRAYSIZE 500
+#define INITIALFILEPATHSIZE 30
+
+int cmain()
+{
+    // declare variables
+    int i,j,k,l;
+    char file[200], name_of_filepath[200]="./";
+    float  x[ARRAYSIZE], y[ARRAYSIZE],radius[ARRAYSIZE], angle[ARRAYSIZE];
+
+    FILE *inputFile;
+
+    //prompt for file name
+    printf("Type file name: ");
+    scanf("%s", file);
+
+    //set full file pathway
+    for(i = 0;i < 200;i++)
+    {
+        name_of_filepath[i+INITIALFILEPATHSIZE] = file[i];
+    }
+
+    //read this file
+    inputFile = fopen(name_of_filepath, "r");
+
+    //check file works
+    if(inputFile == NULL)
+    {
+         printf("Error: Could not find file in current directory. \n");
+    }
+
+    //read in data to arrays
+    for(j = 0;j < ARRAYSIZE;j++)
+    {
+        if( fscanf(inputFile,"%f%f",&radius[j],&angle[j]) == EOF)
+        {
+            break;
+        }
+    }
+
+    fclose(inputFile);
+
+    //convert polar to cartesian
+    for(k = 0;k <= j;k++)
+    {
+        x[k] = radius[k] * cos(angle[k]);
+        y[k] = radius[k] * sin(angle[k]);
+    }
+
+    // open plot window
+    ploton(400,600);
+
+    //scaling plot for bottom right most and top left most entries
+    scalx(x[0],x[1]);
+    scaly(y[0],y[1]);
+
+    //set pen down initially
+    set(x[0],y[0]);
+
+    // put a cross at the point
+    for(l = 0;l < k;l++)
+    {
+        dvect(x[l],y[l]);
+        cross(x[l],y[l]);
+    }
+    return 0;
+}
