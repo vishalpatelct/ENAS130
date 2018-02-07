@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <math.h>
-#include "graphics.h"
+#include <graphics.h>
 
 #define ARRAYSIZE 500
 #define INITIALFILEPATHSIZE 30
+
 
 int cmain()
 {
@@ -11,6 +12,11 @@ int cmain()
     int i,j,k,l;
     char file[200], name_of_filepath[200]="./";
     float  x[ARRAYSIZE], y[ARRAYSIZE],radius[ARRAYSIZE], angle[ARRAYSIZE];
+
+    // function prototypes
+    float xconvert(float radius[],float angle[],int i);
+    float yconvert(float radius[],float angle[],int i);
+    void printArray(float array[ARRAYSIZE],int i);
 
     FILE *inputFile;
 
@@ -30,7 +36,7 @@ int cmain()
     //check file works
     if(inputFile == NULL)
     {
-         printf("Error: Could not find file in current directory. \n");
+         printf("Could not open input file\n");
     }
 
     //read in data to arrays
@@ -44,14 +50,23 @@ int cmain()
 
     fclose(inputFile);
 
+    /*
     //convert polar to cartesian
     for(k = 0;k <= j;k++)
     {
         x[k] = radius[k] * cos(angle[k]);
         y[k] = radius[k] * sin(angle[k]);
     }
+    */
 
-    // open plot window
+    //convert polar to cartesian
+    for(k = 0;k <= j; k++)
+    {
+            x[k] = xconvert(radius, angle, k);
+            y[k] = yconvert(radius, angle, k);
+    }
+
+    // open plotting window
     ploton(400,600);
 
     //scaling plot for bottom right most and top left most entries
@@ -67,5 +82,19 @@ int cmain()
         dvect(x[l],y[l]);
         cross(x[l],y[l]);
     }
+
     return 0;
+}
+
+// funtions to convert polar coordinates to x and y coordinates
+float xconvert(float radius[], float angle[], int k){
+    float output;
+        output=radius[k]*cos(angle[k]);
+    return output;
+}
+
+float yconvert(float radius[], float angle[], int k){
+    float output;
+        output=radius[k]*sin(angle[k]);
+    return output;
 }
