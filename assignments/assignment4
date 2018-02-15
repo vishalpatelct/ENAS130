@@ -1,0 +1,176 @@
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include "graphics.h"
+
+#define NORMALARRAYSIZE 1000
+#define FILEPATHSIZE 256
+
+int cmain()
+{
+    //declaring variables for main function
+    char filepath[FILEPATHSIZE];
+    double x[NORMALARRAYSIZE], y[NORMALARRAYSIZE], xmin, xmax, ymin, ymax, m, b, cc;
+    int n, i;
+
+    //declaring funciton prototypes
+    double min(double array[], int rows);
+    double max(double array[], int rows);
+    double corrCoeff(double x[], double y[], int n);
+    double slope(double x[], double y[], int n);
+    double y_intercept(double x[], double y[], double m, int n);
+
+    //ask for file to open --- please note copy the file path into terminal window (right click file, then hold option and click copy file path --- dragging into window leaves extra spaces at end of filepath
+    FILE *inputFile;
+    printf("Enter file path: (Dragging the file into the terminal window may not work - copy the filepath if so)\n");
+    fgets(filepath,FILEPATHSIZE, stdin);
+    if ((strlen(filepath) > 0) && (filepath[strlen (filepath) - 1] == '\n'))
+        filepath[strlen (filepath) - 1] = '\0';
+    printf("%s\n",filepath);
+
+    //read file
+    inputFile = fopen(filepath, "r");
+
+    //check that file is readable
+    if(inputFile == NULL)
+    {
+        printf("Could not open input file\n");
+    }
+
+    //read in points into the array
+    for(n=0;n < NORMALARRAYSIZE;n++)
+    {
+        if( fscanf(inputFile,"%lf%lf", &x[n], &y[n]) == EOF)
+        {
+            break;
+        }
+    }
+
+    //close file
+    fclose(inputFile);
+
+    xmin = min(x,n);
+    ymin = min(y,n);
+    xmax = max(x,n);
+    ymax = max(y,n);
+    m = slope(x,y,n);
+    b = y_intercept(x,y,m,n);
+    cc = corrCoeff(x,y,n);
+
+    //print values
+    printf("The min x value is %lf, the min y value is %lf, the max x value is %lf, the max y value is %lf.\n",xmin,ymin,xmax,ymax);
+    printf("The correlation coefficient is: %lf\n",cc);
+
+    // open plotting window
+    ploton(600,600);
+
+    //setup scaling for the window
+    scalx(xmin-5,xmax+5);
+    scaly(ymin-5,ymax+5);
+
+    if(fabs(cc)>.25){
+        set(xmin, m*xmin+b);
+        dvect(xmax, m*xmax+b);
+    }
+
+    //mark the individual points with x's
+    for(i=0; i<n; i++ )
+    {
+        cross(x[i],y[i]);
+    }
+
+    return 0;
+}
+
+
+//function that finds min values
+double min(double array[], int n)
+{
+    double min;
+    int k;
+    for(k=0; k<n; k++) {
+        if(k==0) {
+            min=array[k];
+        }
+        if(array[k]<min) {
+            min=array[k];
+        }
+
+    }
+    return min;
+}
+
+//function that finds max values
+double max(double array[], int n)
+{
+    double max;
+    int w;
+    for(w=0; w<n; w++) {
+        if(w==0) {
+            max=array[w];
+        }
+        if(array[w]>max) {
+            max=array[w];
+        }
+
+    }
+    return max;
+}
+
+//function that finds correlation coefficient
+double corrCoeff(double x[], double y[], int n)
+{
+    double cc, xsum=0, ysum=0, xsum2=0, ysum2=0, xysum=0, num, den;
+    int i;
+    for(i=0;i<n;i++)
+    {
+        xsum = xsum+x[i];
+        ysum = ysum+y[i];
+        xsum2 = xsum2 + (x[i]*x[i]);
+        ysum2 = ysum2 + (y[i]*y[i]);
+        xysum = xysum + (x[i]*y[i]);
+    }
+    num = ((n+1)*xysum)-(xsum*ysum);
+    den = sqrt((((n+1)*xsum2)-(xsum*xsum))*(((n+1)*ysum2)-(ysum*ysum)));
+    cc = num/den;
+
+    return cc;
+}
+
+//function that finds slope
+double slope(double x[], double y[], int n)
+{
+    double m, xsum=0, ysum=0, xsum2=0, xysum=0, avgx, avgy, num, den;
+    int i;
+    for(i=0;i<n;i++)
+    {
+        xsum = xsum+x[i];
+        ysum = ysum+y[i];
+        xsum2 = xsum2 + (x[i]*x[i]);
+        xysum = xysum + (x[i]*y[i]);
+    }
+    avgx = xsum/n;
+    avgy = ysum/n;
+    num = (xysum)-(xsum*avgy);
+    den = (xsum2)-(xsum*avgx);
+    m = num/den;
+
+    return m;
+}
+
+//function that finds y intercept
+double y_intercept(double x[], double y[], double m, int n)
+{
+    double b, xsum=0, ysum=0, avgx, avgy;
+    int i;
+    for(i=0; i<n; i++)
+    {
+        xsum = xsum+x[i];
+        ysum = ysum+y[i];
+    }
+    avgx = xsum/(n);
+    avgy = ysum/(n);
+    b = avgy-(m*avgx);
+
+    return b;
+}
