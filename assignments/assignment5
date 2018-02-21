@@ -1,0 +1,189 @@
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+#include "graphics.h"
+
+#define FILEPATHLENGTH 256
+#define ARRAYSIZE 1000
+
+//define struct for wavelength and intensity
+struct spectrum
+{
+    float *wavelength;
+    float *intensity;
+};
+
+typedef struct spectrum spectrum;
+
+int cmain()
+{
+
+    //declare variables
+    spectrum *total, *back, *difference;
+    int i, j, k, l, size1, size2, start;
+    float minwavelength=0, maxwavelength=0, maxintensity=0;
+    char totalfile[FILEPATHLENGTH], backfile[FILEPATHLENGTH];
+
+
+    //declare function prototypes
+    spectrum* readspectrumfromfile(char* filepath, int *size);
+    float max( spectrum* data, int numpoints);
+    void plotspectrum( spectrum* data, int start, int end, float minwave, float maxwave, float maxintensity);
+
+    //enter file paths for total signal and background signal
+    printf("Enter full file path for total signal: (Copy file path if dragging into terminal does not work)\n");
+    fgets(totalfile,FILEPATHLENGTH,stdin);
+    if ((strlen(totalfile) > 0) && (totalfile[strlen (totalfile) - 1] == '\n'))
+        totalfile[strlen (totalfile) - 1] = '\0';
+    printf("Enter full file path for background signal:(Copy file path if dragging into terminal does not work)\n");
+    fgets(backfile,FILEPATHLENGTH,stdin);
+    if ((strlen(backfile) > 0) && (backfile[strlen (backfile) - 1] == '\n'))
+        backfile[strlen (backfile) - 1] = '\0';
+
+    total=readspectrumfromfile(totalfile,&size1);
+    back=readspectrumfromfile(backfile,&size2);
+
+    //find at what wavelength both signals begin to have values
+    start = 0;
+    for(i=0;;i++)
+    {
+        for(j=0; j < size2; j++)
+        {
+            if(total->wavelength[i]==back->wavelength[j])
+            {
+                start = 1;
+                break;
+            }
+        }
+        if (start) break;
+    }
+
+    //find at what wavelength both signals stop having values
+    k=0;
+    while(k < size1 && k < size2 && total->wavelength[i+k]==back->wavelength[j+k])
+        k++;
+
+    //find values of difference between total signal and background
+    difference=malloc(sizeof( spectrum));
+    difference->wavelength = malloc(k*sizeof(float));
+    difference->intensity = malloc(k*sizeof(float));
+    for(l=0;l<=k;l++)
+    {
+        difference->wavelength[l]=total->wavelength[i+l];
+        difference->intensity[l]=total->intensity[i+l]-back->intensity[j+l];
+    }
+
+    //determine which signal starts or ends earlier in order to decide which to use to scale
+    if(total->wavelength[0]<=back->wavelength[0])
+    {
+        minwavelength=total->wavelength[0];
+    }
+    if(total->wavelength[0]>back->wavelength[0])
+    {
+        minwavelength=back->wavelength[0];
+    }
+    if(total->wavelength[size1-1]>=back->wavelength[size2-1])
+    {
+        maxwavelength=total->wavelength[size1-1];
+    }
+    if(total->wavelength[size1-1]<back->wavelength[size2-1]) {
+        maxwavelength=back->wavelength[size2-1];
+    }
+
+    //set max y scale based on max intensity
+    maxintensity=max(total, size1);
+
+    //plot total signal, background and difference
+    plotspectrum(difference, 0, k, minwavelength, maxwavelength, maxintensity);
+    plotspectrum(total, 0, size1, minwavelength, maxwavelength, maxintensity);
+    plotspectrum(back, 0, size2, minwavelength, maxwavelength, maxintensity);
+
+    //free memory
+    free(total->intensity);
+    free(total->wavelength);
+    free(total);
+    free(back->intensity);
+    free(back->wavelength);
+    free(back);
+    free(difference->intensity);
+    free(difference->wavelength);
+    free(difference);
+
+    return 0;
+}
+
+spectrum* readspectrumfromfile(char* filepath, int *size)
+{
+    //declare variables for function
+    int i;
+    spectrum *temp;
+
+    //read file
+    FILE *inputFile;
+    inputFile = fopen(filepath, "r"); //read this file
+    if(inputFile == NULL){     //check file works
+        printf("Could not open input file\n"); }
+
+    //read number of rows in file
+    fscanf(inputFile, "%d\n", size);
+
+    temp=malloc(sizeof( spectrum));
+    temp->wavelength=malloc((*size)*sizeof(float));
+    temp->intensity=malloc((*size)*sizeof(float));
+
+    //read file into array
+    for(i=0; i< *size ; i++ )
+    {
+        fscanf(inputFile,"%f %f",&temp->wavelength[i],&temp->intensity[i]);
+    }
+    if(temp == NULL)
+    {
+        printf("Can't allocate memory.\n");
+    }
+
+    return temp;
+}
+
+float max(spectrum* data,int size)
+{
+    //declare variables
+    int i;
+    float max;
+
+    //check which intensity value is largest
+    for(i=0;i<size;i++) {
+        if(i==0)
+        {
+            max=data->intensity[i];
+        }
+        if(data->intensity[i]>max)
+        {
+            max=data->intensity[i];
+        }
+    }
+
+    return max;
+}
+
+void plotspectrum( spectrum* data, int start, int end, float minwavelength, float maxwavelength, float maxintensity)
+{
+    //declare variables
+    int i;
+
+    //setup static to setup initial plot
+    static int j=0;
+    if(j==0)
+    {
+        ploton(400,800);
+        scalx(minwavelength,maxwavelength);
+        scaly(0.0,maxintensity);
+        j++;
+    }
+
+    //plot values
+    for(i=start;i<end;i++){
+        if(i==start) set(data->wavelength[i],data->intensity[i]);
+        dvect(data->wavelength[i],data->intensity[i]);
+    }
+}
