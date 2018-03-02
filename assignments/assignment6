@@ -1,0 +1,37 @@
+% Part 1
+file = fopen('points.txt');
+data = textscan(file,'%f %f');
+fclose(file);
+x = data{1};
+y = data{2};
+minx = min(x);
+maxx = max(x);
+plot(x,y,'ro');
+hold on;
+coeff = 1;
+while coeff ~= 0
+	coeff = input('Enter order of polynomial to fit to data.\n');
+	if coeff ~=0
+		xfit = linspace(minx,maxx);
+		p = polyfit(x,y,coeff);
+		yfit = polyval(p,xfit);
+		plot(xfit,yfit);
+	else
+	end
+end
+hold off;
+
+% Part 2
+file = fopen('pts3d.txt');
+data = textscan(file,'%f %f %f');
+fclose(file);
+x = data{1};
+y = data{2};
+z = data{3};
+plot3(x,y,z,'b.');
+axis equal;
+disp("These points represent a typical spiral galaxy.")
+
+% Part 3
+load 'jetf.txt';
+surf(jetf);
