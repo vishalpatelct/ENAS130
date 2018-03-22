@@ -1,0 +1,209 @@
+#include <stdio.h>
+#include <math.h>
+
+#include <iostream>
+using namespace std;
+
+// Declaring class for time
+class Time
+{
+private:
+    int hr;
+    int min;
+    float sec;
+public:
+    Time();                 // Constructor in no arguments
+    Time(float);            // Constructor with one float argument
+    void get();             // Asks for user input
+    void show();            // Prints time entry
+    float seconds();        // Converts to seconds
+    int operator<(Time);    // the less than operator determines which entry is larger
+    Time operator-(Time);   // the minus operator subtracts two times
+};
+
+// Implementation
+// Constructor implementation - no arguments
+Time::Time()
+{
+    hr = 0;
+    min = 0;
+    sec = 0.;
+}
+
+// Constructor implementation - one float
+Time::Time(float secs)
+{
+    while(secs >= 86400)
+    {
+        secs -= 86400;
+    }
+    while(secs >= 3600)
+    {
+        hr++;
+        secs -= 3600;
+    }
+    while(secs >= 60)
+    {
+        min++;
+        secs -= 60;
+    }
+    sec = secs;
+}
+
+
+// Implement operators
+int Time::operator<(Time entry)
+{
+    entry.hr -= hr;
+    entry.min -= min;
+    entry.sec -= sec;
+
+    if(entry.seconds() <= 0)
+    {
+        return 0;           // Statement is false
+    }
+    else
+    {
+        return 1;           // Statement is true
+    }
+}
+
+Time Time::operator-(Time entry)
+{
+    entry.hr -= hr;
+    entry.min -= min;
+    entry.sec -= sec;
+
+    // Ensure no negative values are passed
+    float secs = 0.;
+    Time corrected;
+    secs = entry.seconds();
+    entry.hr = 0;
+    entry.min = 0;
+    entry.sec = 0.;
+    if(secs > 0)
+    {
+        while(secs >= 86400)
+        {
+            secs -= 86400;
+        }
+        while(secs >= 3600)
+        {
+            corrected.hr++;
+            secs -= 3600;
+        }
+        while(secs >= 60)
+        {
+            corrected.min++;
+            secs -= 60;
+        }
+        corrected.sec = secs;
+    }
+
+    return corrected;
+}
+
+// Implement other functions
+void Time::get()
+{
+    static int i = 1;
+    cout << "Type time " << i << " (h m s): ";
+    cin >> hr >> min >> sec;
+
+    // Ensure no negative or invalid values are passed
+    float secs = 0.;
+    Time corrected;
+    secs = hr*3600. + min*60. + sec;
+    hr = 0;
+    min = 0;
+    sec = 0.;
+    if(secs > 0)
+    {
+        while(secs >= 86400)
+        {
+            secs -= 86400;
+        }
+        while(secs >= 3600)
+        {
+            hr++;
+            secs -= 3600;
+        }
+        while(secs >= 60)
+        {
+            min++;
+            secs -= 60;
+        }
+        sec = secs;
+    }
+    i++;
+}
+
+void Time::show()
+{
+    cout << hr << " hours " << min << " minutes " << sec << " seconds." << endl;
+}
+
+float Time::seconds()
+{
+    float secMid;
+    secMid = hr*3600. + min*60. + sec;
+    return secMid;
+}
+
+int main()
+{
+    // Declare variables
+    int lessThan;
+    float secUser=0,sec1,sec2,sum1,sum2;
+    // Allocate Time object with no arguments
+    Time time1,time2,difference;
+
+    // Get and show two times
+    time1.get();
+    time1.show();
+    time2.get();
+    time2.show();
+
+    // Get number of seconds since midnight
+    cout << endl << "Type a number of seconds: ";
+    cin >> secUser;
+    Time time3(secUser);
+
+    // Print times in seconds since midnight
+    sec1 = time1.seconds();
+    sec2 = time2.seconds();
+    cout << endl << "time 1 is " << sec1 << " seconds past midnight.";
+    cout << endl << "time 2 is " << sec2 << " seconds past midnight." << endl;
+
+    // Determine which entry is larger
+    lessThan = (time1 < time2);
+
+    // Calculate and print difference
+    if (lessThan == 0)
+    {
+        difference = time2 - time1;
+    }
+    else
+    {
+        difference = time1 - time2;
+    }
+    cout << endl << "Difference in times is ";
+    difference.show();
+    cout << "Which is: " << difference.seconds() << " seconds" << endl;
+
+    // Add specified amount of seconds to time1 and time2
+    sum1 = time1.seconds() + secUser;
+    sum2 = time2.seconds() + secUser;
+
+    // Convert back to hours, minutes, and seconds
+    Time time1plus(sum1);
+    Time time2plus(sum2);
+
+    // Print new times
+    cout << endl << "time 1 is plus " << showpoint << secUser << " seconds is ";
+    time1plus.show();
+    cout << "time 2 is plus " << showpoint << secUser << " seconds is ";
+    time2plus.show();
+
+    return 0;
+}
