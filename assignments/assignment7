@@ -33,6 +33,8 @@ Time::Time()
 // Constructor implementation - one float
 Time::Time(float secs)
 {
+    hr = 0;
+    min = 0;
     while(secs >= 86400)
     {
         secs -= 86400;
@@ -76,31 +78,19 @@ Time Time::operator-(Time entry)
 
     // Ensure no negative values are passed
     float secs = 0.;
-    Time corrected;
-    secs = entry.seconds();
+    secs = -1.*entry.seconds();
     entry.hr = 0;
     entry.min = 0;
     entry.sec = 0.;
     if(secs > 0)
     {
-        while(secs >= 86400)
-        {
-            secs -= 86400;
-        }
-        while(secs >= 3600)
-        {
-            corrected.hr++;
-            secs -= 3600;
-        }
-        while(secs >= 60)
-        {
-            corrected.min++;
-            secs -= 60;
-        }
-        corrected.sec = secs;
+        Time corrected(secs);
+        return corrected;
     }
-
-    return corrected;
+    else
+    {
+        return entry;
+    };
 }
 
 // Implement other functions
@@ -179,7 +169,7 @@ int main()
     lessThan = (time1 < time2);
 
     // Calculate and print difference
-    if (lessThan == 0)
+    if (lessThan == 1)
     {
         difference = time2 - time1;
     }
