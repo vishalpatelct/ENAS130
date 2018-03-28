@@ -97,33 +97,26 @@ Time Time::operator-(Time entry)
 void Time::get()
 {
     static int i = 1;
+
+    Time input;
     cout << "Type time " << i << " (h m s): ";
-    cin >> hr >> min >> sec;
+    cin >> input.hr >> input.min >> input.sec;
 
     // Ensure no negative or invalid values are passed
-    float secs = 0.;
-    Time corrected;
-    secs = hr*3600. + min*60. + sec;
-    hr = 0;
-    min = 0;
-    sec = 0.;
+    float secs = input.seconds();
+
     if(secs > 0)
     {
-        while(secs >= 86400)
-        {
-            secs -= 86400;
-        }
-        while(secs >= 3600)
-        {
-            hr++;
-            secs -= 3600;
-        }
-        while(secs >= 60)
-        {
-            min++;
-            secs -= 60;
-        }
-        sec = secs;
+        Time corrected(secs);
+        hr = corrected.hr;
+        min = corrected.min;
+        sec = corrected.sec;
+    }
+    else
+    {
+        hr = 0;
+        min = 0;
+        sec = 0.;
     }
     i++;
 }
