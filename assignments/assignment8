@@ -83,7 +83,7 @@ void loop() {
   ones = value - decimal;
 
   // Send values to MQTT every 2 minutes
-  if((millis() - lastTempUpdate) >= (TEMP_TIME_INCREMENT * 1000))
+  if((millis() - lastTempUpdate) > (TEMP_TIME_INCREMENT * 1000))
   {
     if (client.isConnected())
     {
