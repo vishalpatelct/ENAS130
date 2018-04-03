@@ -5,16 +5,25 @@
  * Date: 03/31/18
  */
 
+// Setup MQTT server related funtions and constant numbers
+#include <MQTT.h>
+#define TEMP_TIME_INCREMENT 120
+
+// Empty MQTT callback function & address and port
+void callback(char* topic, byte* payload, unsigned int length)
+{
+}
+MQTT client("guilford.eng.yale.edu", 1883, callback);
+
 // Define variables
-int LEDstate = -1;
-int offTime = 1000, sOffTime = 200;
+int LEDstate = -1,offTime = 1000,sOffTime = 250,lastTempUpdate=0;
 int lightSig,tempSig;
 double voltage,tempInF,tempInC,value,decimal,ones;
 
 // Define sensor variables
 int lightPin = A0;
 int tempPin = A1;
-int led1 = D6, led2 = D7;
+int led1 = D6,led2 = D7;
 
 // Define functions
 int LEDmode(String command)
@@ -31,21 +40,23 @@ int LEDmode(String command)
   }
 }
 
-
 void setup() {
-  // Default to temperature reading
+  // Default to temperature reading & set time zone
   LEDstate = 2;
+  Time.zone(-5);
 
   // Setup pins
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);
 
   // Define Particle variables
-  Particle.variable("tempF", tempInF);
-  Particle.variable("light", lightSig);
+  Particle.variable("temperature",tempInF);
+  Particle.variable("lightValue",lightSig);
 
   // Define Particle Functions
   Particle.function("setLEDmode", LEDmode);
+
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -71,6 +82,27 @@ void loop() {
   }
   ones = value - decimal;
 
+  // Send values to MQTT every 2 minutes
+  if((millis() - lastTempUpdate) >= (TEMP_TIME_INCREMENT * 1000))
+  {
+    if (client.isConnected())
+    {
+       client.loop();
+    }
+    else
+    {
+       client.connect("particleClient");
+    }
+    if (client.isConnected())
+    {
+        String topic = "/130/sensors";
+        String payload = String(tempInF) + ", " + String(Time.now()) + ", " + String(lightSig) + ", " + "'vpatel'";
+        client.publish(topic,payload);
+        Serial.println(payload);
+    }
+    lastTempUpdate = millis();
+  }
+
   // Blink to signal last digit of temperature in F
   if(LEDstate == 2)
   {
@@ -91,7 +123,7 @@ void loop() {
   // Blink at inversely proportion rate to light signal when in light mode
   if(LEDstate == 1)
   {
-    offTime = (5000000/lightSig);
+    offTime = (4095000/lightSig);
     digitalWrite(led1, HIGH);
     digitalWrite(led2, HIGH);
     delay(offTime);
@@ -99,5 +131,4 @@ void loop() {
     digitalWrite(led2, LOW);
     delay(offTime);
   }
-
 }
