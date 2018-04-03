@@ -7,13 +7,14 @@
 
 // Define variables
 int LEDstate = -1;
-int offTime = 500;
+int offTime = 1000, sOffTime = 200;
 int lightSig,tempSig;
+double voltage,tempInF,tempInC,value,decimal,ones;
 
 // Define sensor variables
 int lightPin = A0;
 int tempPin = A1;
-int led1 = D0, led2 = D7;
+int led1 = D6, led2 = D7;
 
 // Define functions
 int LEDmode(String command)
@@ -40,7 +41,7 @@ void setup() {
   pinMode(led2, OUTPUT);
 
   // Define Particle variables
-  Particle.variable("tempF", tempSig);
+  Particle.variable("tempF", tempInF);
   Particle.variable("light", lightSig);
 
   // Define Particle Functions
@@ -48,25 +49,49 @@ void setup() {
 }
 
 void loop() {
+  //collect signal
   lightSig = analogRead(lightPin);
   tempSig = analogRead(tempPin);
+
+  // Convert to degrees F
+  voltage = (tempSig * 3.3) / 4095.;
+  tempInC = (voltage - .5) * 100;
+  tempInF = ((tempInC * 9) / 5.) + 32.;
+
+  // Isolate last digit of temp in F
+  value = tempInF;
+  while(value >= 10)
+  {
+    value -= 10;
+  }
+  decimal = value;
+  while(decimal >= 1)
+  {
+    decimal -= 1;
+  }
+  ones = value - decimal;
 
   // Blink to signal last digit of temperature in F
   if(LEDstate == 2)
   {
-    offTime = 1000;
-    digitalWrite(led1, HIGH);
-    digitalWrite(led2, HIGH);
-    delay(offTime);
-    digitalWrite(led1, LOW);
-    digitalWrite(led2, LOW);
+    while(ones > 0)
+    {
+      ones -= 1;
+      digitalWrite(led1, HIGH);
+      digitalWrite(led2, HIGH);
+      delay(sOffTime);
+      digitalWrite(led1, LOW);
+      digitalWrite(led2, LOW);
+      delay(sOffTime);
+    }
+    offTime = 3000;
     delay(offTime);
   }
 
   // Blink at inversely proportion rate to light signal when in light mode
   if(LEDstate == 1)
   {
-    offTime = (3000000/lightSig);
+    offTime = (5000000/lightSig);
     digitalWrite(led1, HIGH);
     digitalWrite(led2, HIGH);
     delay(offTime);
