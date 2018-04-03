@@ -1,0 +1,78 @@
+/*
+ * Project Assignment_8
+ * Description: Photon and the Internet of Things
+ * Author: Vishal Patel
+ * Date: 03/31/18
+ */
+
+// Define variables
+int LEDstate = -1;
+int offTime = 500;
+int lightSig,tempSig;
+
+// Define sensor variables
+int lightPin = A0;
+int tempPin = A1;
+int led1 = D0, led2 = D7;
+
+// Define functions
+int LEDmode(String command)
+{
+  if(command == "light")
+  {
+    LEDstate = 1;
+    return LEDstate;
+  }
+  if(command == "temp")
+  {
+    LEDstate = 2;
+    return LEDstate;
+  }
+}
+
+
+void setup() {
+  // Default to temperature reading
+  LEDstate = 2;
+
+  // Setup pins
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+
+  // Define Particle variables
+  Particle.variable("tempF", tempSig);
+  Particle.variable("light", lightSig);
+
+  // Define Particle Functions
+  Particle.function("setLEDmode", LEDmode);
+}
+
+void loop() {
+  lightSig = analogRead(lightPin);
+  tempSig = analogRead(tempPin);
+
+  // Blink to signal last digit of temperature in F
+  if(LEDstate == 2)
+  {
+    offTime = 1000;
+    digitalWrite(led1, HIGH);
+    digitalWrite(led2, HIGH);
+    delay(offTime);
+    digitalWrite(led1, LOW);
+    digitalWrite(led2, LOW);
+    delay(offTime);
+  }
+
+  // Blink at inversely proportion rate to light signal when in light mode
+  if(LEDstate == 1)
+  {
+    offTime = (3000000/lightSig);
+    digitalWrite(led1, HIGH);
+    digitalWrite(led2, HIGH);
+    delay(offTime);
+    digitalWrite(led1, LOW);
+    digitalWrite(led2, LOW);
+    delay(offTime);
+  }
+
+}
