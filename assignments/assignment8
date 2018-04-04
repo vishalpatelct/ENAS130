@@ -70,8 +70,8 @@ void loop() {
 
   // Convert to degrees F
   voltage = (tempSig * 3.3) / 4095.;
-  tempInC = (voltage - .5) * 100;
-  tempInF = round((((tempInC * 9) / 5.) + 32.) * 100)/100;
+  tempInC = (voltage - .5) * 100.;
+  tempInF = round((((tempInC * 9.) / 5.) + 32.) * 100.) / 100.;
 
   // Send values to MQTT every 2 minutes
   if((millis() - lastTempUpdate) > (TEMP_TIME_INCREMENT * 1000))
