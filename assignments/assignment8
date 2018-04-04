@@ -16,7 +16,8 @@ void callback(char* topic, byte* payload, unsigned int length)
 MQTT client("guilford.eng.yale.edu", 1883, callback);
 
 // Define global variables
-int LEDstate = -1,lightSig,tempInF;
+int LEDstate = -1,lightSig,
+double tempInF;
 
 // Define sensor variables
 int lightPin = A0;
