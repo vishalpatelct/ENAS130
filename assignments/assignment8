@@ -7,6 +7,7 @@
 
 // Setup MQTT server related funtions and constant numbers
 #include <MQTT.h>
+#include "math.h"
 #define TEMP_TIME_INCREMENT 120
 
 // Empty MQTT callback function & address and port
@@ -16,7 +17,7 @@ void callback(char* topic, byte* payload, unsigned int length)
 MQTT client("guilford.eng.yale.edu", 1883, callback);
 
 // Define global variables
-int LEDstate = -1,lightSig;
+int LEDstate = -1,lightSig,lastTempUpdate=0;
 double tempInF;
 
 // Define sensor variables
@@ -24,7 +25,7 @@ int lightPin = A0;
 int tempPin = A1;
 int led1 = D6,led2 = D7;
 
-// Define functions
+// Define LED mode function
 int LEDmode(String command)
 {
   if(command == "light")
@@ -60,7 +61,7 @@ void setup() {
 
 void loop() {
   // Declare variables for use in loop
-  int offTime = 1000,sOffTime = 250,lastTempUpdate=0;
+  int offTime = 1000,sOffTime = 250;
   double voltage,tempSig,tempInC,value,decimal,ones;
 
   // Collect signal
@@ -70,7 +71,7 @@ void loop() {
   // Convert to degrees F
   voltage = (tempSig * 3.3) / 4095.;
   tempInC = (voltage - .5) * 100;
-  tempInF = ((tempInC * 9) / 5.) + 32.;
+  tempInF = round((((tempInC * 9) / 5.) + 32.) * 100)/100;
 
   // Send values to MQTT every 2 minutes
   if((millis() - lastTempUpdate) > (TEMP_TIME_INCREMENT * 1000))
@@ -88,7 +89,7 @@ void loop() {
         String topic = "/130/sensors";
         String payload = String(tempInF) + ", " + String(Time.now()) + ", " + String(lightSig) + ", " + "'patelv'";
         client.publish(topic,payload);
-        Serial.println(payload);
+        ///Serial.println(payload);
     }
     lastTempUpdate = millis();
   }
