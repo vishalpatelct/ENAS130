@@ -56,11 +56,11 @@ void setup() {
   // Define Particle Functions
   Particle.function("setLEDmode", LEDmode);
 
-  Serial.begin(9600);
+  ///Serial.begin(9600);
 }
 
 void loop() {
-  //collect signal
+  // Collect signal
   lightSig = analogRead(lightPin);
   tempSig = analogRead(tempPin);
 
@@ -68,19 +68,6 @@ void loop() {
   voltage = (tempSig * 3.3) / 4095.;
   tempInC = (voltage - .5) * 100;
   tempInF = ((tempInC * 9) / 5.) + 32.;
-
-  // Isolate last digit of temp in F
-  value = tempInF;
-  while(value >= 10)
-  {
-    value -= 10;
-  }
-  decimal = value;
-  while(decimal >= 1)
-  {
-    decimal -= 1;
-  }
-  ones = value - decimal;
 
   // Send values to MQTT every 2 minutes
   if((millis() - lastTempUpdate) > (TEMP_TIME_INCREMENT * 1000))
@@ -96,16 +83,30 @@ void loop() {
     if (client.isConnected())
     {
         String topic = "/130/sensors";
-        String payload = String(tempInF) + ", " + String(Time.now()) + ", " + String(lightSig) + ", " + "'vpatel'";
+        String payload = String(tempInF) + ", " + String(Time.now()) + ", " + String(lightSig) + ", " + "'patelv'";
         client.publish(topic,payload);
         Serial.println(payload);
     }
     lastTempUpdate = millis();
   }
 
-  // Blink to signal last digit of temperature in F
+  // Blink to signal last digit before decimal of temperature in F
   if(LEDstate == 2)
   {
+    // Isolate last digit of temp in F
+    value = tempInF;
+    while(value >= 10)
+    {
+      value -= 10;
+    }
+    decimal = value;
+    while(decimal >= 1)
+    {
+      decimal -= 1;
+    }
+    ones = value - decimal;
+
+    // Blink lights corresponding to last digit before decimal
     while(ones > 0)
     {
       ones -= 1;
@@ -123,7 +124,7 @@ void loop() {
   // Blink at inversely proportion rate to light signal when in light mode
   if(LEDstate == 1)
   {
-    offTime = (4095000/lightSig);
+    offTime = (4000000/lightSig);
     digitalWrite(led1, HIGH);
     digitalWrite(led2, HIGH);
     delay(offTime);
