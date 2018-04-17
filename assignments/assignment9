@@ -41,10 +41,12 @@ universe::universe(int wid,int hei,int wra)
 
 //  Destructor that frees memory associated with array.
 universe::~universe()
-f(array != NULL) {
-  delete[] array;
-  array = NULL;
-  cout << "Memory freed." << endl;
+{
+  if(array != NULL) {
+    delete[] array;
+    array = NULL;
+    cout << "Memory freed." << endl;
+  }
 }
 
 //  Display the live cells in a graphics window.
@@ -124,10 +126,10 @@ void universe::operator<<(char* file)
   int i;
   for(i = 0;i < (width * height);i++)
   {
-    inFile >> array[i];
+    inputFile >> array[i];
   }
 
-  inFile.close();
+  inputFile.close();
 }
 
 //  Save the universe to a file with the specified name (format as above).
@@ -153,46 +155,55 @@ void universe::operator>>(char* save)
 void universe::operator=(universe& old)
 {
   int i;
-  for(i = 0;i < (old.height * old.width);i++)
+
+  wrap = old.wrap;
+  height = old.height;
+  width = old.width;
+
+  array = new int[width*height];
+
+  for(i = 0; i < (old.height * old.width);i++)
   {
     array[i] = old.array[i];
   }
-
-  height = old.height;
-  width = old.width;
-  wrap = old.wrap;
 }
 
 //  Calculate the new generation by applying the rules, then
 //  display the new generation.
-void universe::operator<<(universe& in)
+void universe::operator<<(universe& old)
 {
   int i,j;
-  for(i = 0; i < height; i++)
+  for(i = 0;i < height;i++)
   {
-    for(j = 0; j < width; j++)
+    for(j = 0;j < width;j++)
     {
       //  If alive
-      if(in.value(i,j))
+      if(old.value(i,j) == 1)
       {
-        if(in.neighbors(i,j) < 2)
+        if(old.neighbors(i,j) < 2)
         {
-          setvalue(int(i),int(j),0);
+          setvalue(i,j, 0);
         }
-        if(in.neighbors(i,j) >= 2 && in.neighbors(i,j) <= 3)
+        if(old.neighbors(i,j) >= 2 && old.neighbors(i,j) <= 3)
         {
-          setvalue(int(i),int(j),1);
+          setvalue(i, j, 1);
         }
-        if(in.neighbors(i,j) > 3)
+        if(old.neighbors(i,j) > 3)
         {
-          setvalue(int(i),int(j),0);
+          setvalue(i, j, 0);
         }
       }
-
-      // If dead
-      else if(in.neighbors(i,j) == 3)
+      else
       {
-        setvalue(int(i),int(j),1);
+        //  If dead
+        if(old.neighbors(i,j)==3)
+        {
+          setvalue(i, j, 1);
+        }
+        else
+        {
+          setvalue(i,j,0);
+        }
       }
     }
   }
@@ -275,12 +286,13 @@ int universe::neighbors(int i,int j)
 //  Returns the value at cell i,j (0 or 1).
 int universe::value(int i,int j)
 {
-  int cell = array[i * width + j];
+  int cell;
+  cell = array[i * width + j];
   return cell;
 }
 
 //  Sets the value of the cell at i,j.
 void universe::setvalue(int i,int j,int cell)
 {
-  cell = array[i * width + j];
+  array[i * width + j] = cell;
 }
