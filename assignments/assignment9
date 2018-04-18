@@ -6,6 +6,7 @@
 #include "life.h"
 
 // Additonal libaries
+#include <iomanip>
 #include <algorithm>
 
 using namespace std;
@@ -19,89 +20,89 @@ enum Colors {NO_FILL = -1, GREY, RED, GREEN, BLUE};
 //  A null constructor: sets array to NULL, width, height, and wrap to 0.
 universe::universe()
 {
-  array = NULL;
-  height = 0;
-  width = 0;
-  wrap = 0;
+    array = NULL;
+    height = 0;
+    width = 0;
+    wrap = 0;
 }
 
 //  Constructor to allocate space for a universe of given width (first value)
 //  height (second value) and wrap setting (third value). Sets all cells to 0.
 universe::universe(int wid,int hei,int wra)
 {
-  int size = wid * hei;
+    int size = wid * hei;
 
-  array = new int[size];
-  width = wid;
-  height = hei;
-  wrap = wra;
+    array = new int[size];
+    width = wid;
+    height = hei;
+    wrap = wra;
 
-  fill_n(array, size, 0);
+    fill_n(array, size, 0);
 }
 
 //  Destructor that frees memory associated with array.
 universe::~universe()
 {
-  if(array != NULL) {
-    delete[] array;
-    array = NULL;
-    cout << "Memory freed." << endl;
-  }
+    if(array != NULL) {
+        delete[] array;
+        array = NULL;
+        cout << "Memory freed." << endl;
+    }
 }
 
 //  Display the live cells in a graphics window.
 void universe::display()
 {
-  static int boot = 0;
-  int i,j;
+    static int boot = 0;
+    int i,j;
 
-  while(boot == 0)
-  {
-    ploton((height * PIXEL), (width * PIXEL));
-    scalx(0.0, width);
-    scaly(0.0, height);
-    boot = 1;
-  }
-  clear();
-
-  for(i = 0;i < width;i++)
-  {
-    for(j = 0;j < height;j++)
+    while(boot == 0)
     {
-      if(value(i,j) == 1)
-      {
-        drawRect(j,i,j + 1,i + 1,BLUE,1);
-      }
+        ploton((height * PIXEL), (width * PIXEL));
+        scalx(0.0, width);
+        scaly(0.0, height);
+        boot = 1;
     }
-  }
+    clear();
 
-  updateImage();
+    for(i = 0;i < width;i++)
+    {
+        for(j = 0;j < height;j++)
+        {
+            if(value(i,j) == 1)
+            {
+                drawRect(j,i,j + 1,i + 1,BLUE,1);
+            }
+        }
+    }
+
+    updateImage();
 }
 
 //  Display the universe then allow the user to interactively modify
 //  the cell arrangement using the mouse.
 void universe::setup()
 {
-  display();
+    display();
 
-  int drag, i, j;
-  float x, y;
+    int drag, i, j;
+    float x, y;
 
-  while(getmouse(&x, &y, &drag) != RIGHT_BUTTON)
-  {
-    i = y;
-    j = x;
-    if(value(i,j) == 1 && !drag)
+    while(getmouse(&x, &y, &drag) != RIGHT_BUTTON)
     {
-      setvalue(i,j,0);
-      display();
+        i = y;
+        j = x;
+        if(value(i,j) == 1 && !drag)
+        {
+            setvalue(i,j,0);
+            display();
+        }
+        else
+        {
+            setvalue(i,j,1);
+            display();
+        }
     }
-    else
-    {
-      setvalue(i,j,1);
-      display();
-    }
-  }
 }
 
 //  Read in a universe from a file; first number has the width,
@@ -110,189 +111,193 @@ void universe::setup()
 //  then 1s/0s in a 2D integer array represent living/dead cells.
 void universe::operator<<(char* file)
 {
-  ifstream inputFile;
-  inputFile.open(file);
-  if(inputFile.fail())
-  {
-    cout << "Unable to open file: " << file << endl;
-  }
+    ifstream inputFile;
+    inputFile.open(file);
+    if(inputFile.fail())
+    {
+        cout << "Unable to open file: " << file << endl;
+    }
 
-  inputFile >> width;
-  inputFile >> height;
-  inputFile >> wrap;
+    inputFile >> width;
+    inputFile >> height;
+    inputFile >> wrap;
 
-  array = new int[width*height];
+    array = new int[width*height];
 
-  int i;
-  for(i = 0;i < (width * height);i++)
-  {
-    inputFile >> array[i];
-  }
+    int i;
+    for(i = 0;i < (width * height);i++)
+    {
+        inputFile >> array[i];
+    }
 
-  inputFile.close();
+    inputFile.close();
 }
 
 //  Save the universe to a file with the specified name (format as above).
 void universe::operator>>(char* save)
 {
-  ofstream outputFile;
-  outputFile.open(save);
-  outputFile << width << endl << height << endl << wrap << endl;
+    ofstream outputFile;
+    outputFile.open (save);
 
-  int i,j;
-  for(i = 0;i < height;i++)
-  {
-    for(j = 0;j < width;j++)
+    //  Forrmat for output
+    outputFile << setiosflags(ios::fixed) << setiosflags(ios::showpoint);
+
+    int i,j;
+    outputFile << width << endl << height << endl << wrap << endl << endl;
+
+    for(i = 0;i < height;i++)
     {
-      outputFile << value(i,j);
+        for(j = 0;j < width;j++)
+        {
+            outputFile << value(i,j);
+        }
+        outputFile << endl;
     }
-    outputFile << endl;
-  }
-  outputFile.close();
+    outputFile.close();
 }
 
 //  Copy the contents of one universe to another.
 void universe::operator=(universe& old)
 {
-  int i;
+    int i;
 
-  wrap = old.wrap;
-  height = old.height;
-  width = old.width;
+    wrap = old.wrap;
+    height = old.height;
+    width = old.width;
 
-  array = new int[width*height];
+    array = new int[width*height];
 
-  for(i = 0; i < (old.height * old.width);i++)
-  {
-    array[i] = old.array[i];
-  }
+    for(i = 0; i < (old.height * old.width);i++)
+    {
+        array[i] = old.array[i];
+    }
 }
 
 //  Calculate the new generation by applying the rules, then
 //  display the new generation.
 void universe::operator<<(universe& old)
 {
-  int i,j;
-  for(i = 0;i < height;i++)
-  {
-    for(j = 0;j < width;j++)
+    int i,j;
+    for(i = 0;i < height;i++)
     {
-      //  If alive
-      if(old.value(i,j) == 1)
-      {
-        if(old.neighbors(i,j) < 2)
+        for(j = 0;j < width;j++)
         {
-          setvalue(i,j, 0);
+            //  If alive
+            if(old.value(i,j) == 1)
+            {
+                if(old.neighbors(i,j) < 2)
+                {
+                    setvalue(i,j, 0);
+                }
+                if(old.neighbors(i,j) >= 2 && old.neighbors(i,j) <= 3)
+                {
+                    setvalue(i, j, 1);
+                }
+                if(old.neighbors(i,j) > 3)
+                {
+                    setvalue(i, j, 0);
+                }
+            }
+            else
+            {
+                //  If dead
+                if(old.neighbors(i,j)==3)
+                {
+                    setvalue(i, j, 1);
+                }
+                else
+                {
+                    setvalue(i,j,0);
+                }
+            }
         }
-        if(old.neighbors(i,j) >= 2 && old.neighbors(i,j) <= 3)
-        {
-          setvalue(i, j, 1);
-        }
-        if(old.neighbors(i,j) > 3)
-        {
-          setvalue(i, j, 0);
-        }
-      }
-      else
-      {
-        //  If dead
-        if(old.neighbors(i,j)==3)
-        {
-          setvalue(i, j, 1);
-        }
-        else
-        {
-          setvalue(i,j,0);
-        }
-      }
     }
-  }
 
-  delay(10);
-  display();
+    delay(10);
+    display();
 }
 
 //  Returns the number of neighbors of the cell at i,j.
 int universe::neighbors(int i,int j)
 {
-  int n = 0,a,b,l,r;
+    int n = 0,a,b,l,r;
 
-  b = i + 1;
-  a = i - 1;
-  r = j + 1;
-  l = j - 1;
+    b = i + 1;
+    a = i - 1;
+    r = j + 1;
+    l = j - 1;
 
-  if(wrap)
-  {
-    if(i == 0)
+    if(wrap)
     {
-      a = height - 1;
-    }
-    if(i == height - 1)
-    {
-      b = 0;
-    }
-    if(j == 0)
-    {
-      l = width - 1;
-    }
-    if(j == width - 1)
-    {
-      r = 0;
+        if(i == 0)
+        {
+            a = height - 1;
+        }
+        if(i == height - 1)
+        {
+            b = 0;
+        }
+        if(j == 0)
+        {
+            l = width - 1;
+        }
+        if(j == width - 1)
+        {
+            r = 0;
+        }
+
+        n = value(a,l) + value(a,r) + value(a,j) + value(b,l) + value(b,r) + value(b,j) + value(i,l) + value(i,r);
     }
 
-    n = value(a,l) + value(a,r) + value(a,j) + value(b,l) + value(b,r) + value(b,j) + value(i,l) + value(i,r);
-  }
+    else
+    {
+        if(i != height - 1)
+        {
+            n = value(b,j);
+        }
+        if(i != 0)
+        {
+            n = n + value(a,j);
+        }
+        if(j != width - 1)
+        {
+            n = n + value(i,r);
+        }
+        if(j != 0)
+        {
+            n = n + value(i,l);
+        }
+        if(i != height-1 && j != width-1)
+        {
+            n = n + value(b,r);
+        }
+        if(i != 0 && j != width - 1)
+        {
+            n = n + value(a,r);
+        }
+        if(i != 0 && j != 0)
+        {
+            n = n + value(a,l);
+        }
+        if(i != height - 1 && j != 0)
+        {
+            n = n + value(b,l);
+        }
+    }
 
-  else
-  {
-    if(i != height - 1)
-    {
-      n = value(b,j);
-    }
-    if(i != 0)
-    {
-      n = n + value(a,j);
-    }
-    if(j != width - 1)
-    {
-      n = n + value(i,r);
-    }
-    if(j != 0)
-    {
-      n = n + value(i,l);
-    }
-    if(i != height-1 && j != width-1)
-    {
-      n = n + value(b,r);
-    }
-    if(i != 0 && j != width - 1)
-    {
-      n = n + value(a,r);
-    }
-    if(i != 0 && j != 0)
-    {
-      n = n + value(a,l);
-    }
-    if(i != height - 1 && j != 0)
-    {
-      n = n + value(b,l);
-    }
-  }
-
-  return n;
+    return n;
 }
 
 //  Returns the value at cell i,j (0 or 1).
 int universe::value(int i,int j)
 {
-  int cell;
-  cell = array[i * width + j];
-  return cell;
+    int cell;
+    cell = array[i * width + j];
+    return cell;
 }
 
 //  Sets the value of the cell at i,j.
 void universe::setvalue(int i,int j,int cell)
 {
-  array[i * width + j] = cell;
+    array[i * width + j] = cell;
 }
