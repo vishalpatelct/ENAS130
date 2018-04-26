@@ -1,0 +1,226 @@
+#include <iostream>
+#include <fstream>
+#include <math.h>
+#include <stdlib.h>
+#include "final.h"
+#include "graphics.h"
+
+using namespace std;
+
+//  Final Project
+
+//  Implementation
+//  Your code to implement the vertex and solid classes goes here.
+//  Don't make changes to any other code included in this project.
+//  You only need to submit your version of the final.cpp file.
+
+
+
+//  Implementation of the vertex class
+
+
+//  Constructor setting x, y, and z to specific values
+vertex::vertex(float one,float two,float three)
+{
+    x = one;
+    y = two;
+    z = three;
+}
+
+
+//  Vertex Operators
+//  Operator to subtract vertices
+vertex vertex::operator-(vertex next)
+{
+    vertex result;
+
+    result.x += x;
+    result.y += y;
+    result.z += z;
+
+    result.x -= next.x;
+    result.y -= next.y;
+    result.z -= next.z;
+
+    return result;
+}
+
+//  Operator to perform scalar operations
+vertex vertex::operator*(float next)
+{
+    vertex result;
+
+    result.x = next * x;
+    result.y = next * y;
+    result.z = next * z;
+
+    return result;
+}
+
+//  Operator to perform dot products
+float vertex::operator*(vertex next)
+{
+    float result = 0.;
+
+    result += (x * next.x);
+    result += (y * next.y);
+    result += (z * next.z);
+
+    return result;
+}
+
+//  Operator to perform cross products
+vertex vertex::operator%(vertex next)
+{
+    vertex result;
+
+    result.x = ((y * next.z) - (z * next.y));
+    result.y = ((x * next.z) - (z * next.x));
+    result.z = ((x * next.y) - (y * next.x));
+
+    return result;
+}
+
+
+//  Vertex Functions
+//  Function to perform projection of vertex using prescribed distance
+vertex vertex::project(vertex cop, float z0)
+{
+    vertex point(x,y,z);
+
+    float num = z0 - point.z;
+    float den = point.z - cop.z;
+    float frac = num / den;
+
+    vertex temp = point - cop;
+
+    vertex temp2 = temp * frac;
+
+    vertex result;
+    result.x = point.x + temp2.x;
+    result.y = point.y + temp2.y;
+    result.z = point.z + temp2.z;
+
+    return result;
+}
+
+//  Function to rotate around z axis
+vertex vertex::rotz(float rad)
+{
+    vertex result;
+    result.x = x * cos(rad) - y * sin(rad);
+    result.y = x * sin(rad) + y * cos(rad);
+    result.z = z;
+
+    return result;
+}
+
+//  Function to rotate around y axis
+vertex vertex::roty(float rad)
+{
+    vertex result;
+    result.x = x * cos(rad) + z * sin(rad);
+    result.y = y;
+    result.z = z * cos(rad) - x * sin(rad);
+
+    return result;
+}
+
+//  Function to rotate around x axis
+vertex vertex::rotx(float rad)
+{
+    vertex result;
+    result.x = x;
+    result.y = y * cos(rad) - z * sin(rad);
+    result.z = y * sin(rad) + z * cos(rad);
+
+    return result;
+}
+
+//  Function to return unit vector
+vertex vertex::unit()
+{
+    vertex result,old(x,y,z);
+    float magn = sqrt(x * x + y * y + z * z);
+    result = old * (1/magn);
+
+    return result;
+}
+
+
+//  Implementation of the solid class
+
+
+//  Constructor setting everything to zero
+solid::solid()
+{
+    points = 0;
+    cop = {0,0,0};
+    z0 = 0;
+    polys = 0;
+    npts = 0;
+    npoly = 0;
+    needsInitialization = 0;
+}
+
+
+//  Operator to read in points and polygon data from
+//  the specified file & initialize the COP and Z0
+void solid::operator<<(char* filename)
+{
+    int counter,counter2,counter3,counter4;
+
+    needsInitialization = 1;
+
+    ifstream inFile;
+    inFile.open( filename );
+    if(inFile.fail())
+    {
+        cout << "Unable to open file: "<< filename << endl;
+        return;
+    }
+
+    inFile >> npts;
+    points = new vertex[npts];
+    for(counter = 0;counter < npts;counter++)
+    {
+        inFile >> points[counter].x >> points[counter].y >> points[counter].z;
+    }
+
+    inFile >> npoly;
+    polys = new poly[npoly];
+    for(counter2 = 0;counter2 < npoly;counter2++)
+    {
+        inFile >> polys[counter2].numVert;
+        for(counter3 = 0;counter3 < polys[counter2].numVert;counter3++)
+        {
+            inFile >> polys[counter2].vertexList[counter3];
+        }
+    }
+    for(counter4 = 0;counter4 < npoly;counter4++)
+    {
+        inFile >> polys[counter4].color;
+    }
+
+
+}
+
+
+//  Solid Functions
+//  Function to project the data points and plot the results
+void solid::projectAndPlot(int showColors)
+{
+
+}
+
+//  Function to rotate all points in the object by the specified angle
+void solid::rotate(int axis,float rad)
+{
+
+}
+
+//  Function to return vector that is normal to polygon
+vertex solid::polyNorm(int pnum)
+{
+
+}
